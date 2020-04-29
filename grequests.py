@@ -18,10 +18,15 @@ try:
 except ImportError:
     raise RuntimeError('Gevent is required for grequests.')
 
+import warnings
+
+warnings.filterwarnings(action="ignore", module=".*urllib3.*")
+
 # Monkey-patch.
 curious_george.patch_all(thread=False, select=False)
 
-from requests import Session
+#from requests import Session
+from requests_html import HTMLSession as Session
 
 __all__ = (
     'map', 'imap',
@@ -128,6 +133,7 @@ def map(requests, stream=False, size=None, exception_handler=None, gtimeout=None
 
     for request in requests:
         if request.response is not None:
+            request.response.html.render()
             ret.append(request.response)
         elif exception_handler and hasattr(request, 'exception'):
             ret.append(exception_handler(request, request.exception))
